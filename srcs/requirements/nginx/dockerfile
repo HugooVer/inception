@@ -1,30 +1,29 @@
+# using the penultimate stable version of Debian
 FROM debian:bullseye
 
-EXPOSE 443
+# EXPOSE 443
 
+# update the package list and install our package
 RUN apt update && \
 	apt install -y --no-install-recommends --no-install-suggests \
 	nginx \
 	openssl && \
 	rm -rf /var/lib/apt/lists/*
 
-ARG	CERT_FOLDER CERTIFICATE KEY COUNTRY STATE LOCALITY ORGANIZATION UNIT COMMON_NAME
-
-RUN mkdir -p ${CERT_FOLDER} && \
+# directory creation for the ssl certificate and creating the certificate
+RUN mkdir -p /etc/nginx/certs/ && \
 	openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes \
-	-out ${CERTIFICATE} \
-	-keyout ${KEY} \
-	-subj "/C=${COUNTRY}/ST=${STATE}/L=${LOCALITY}/O=${ORGANIZATION}/OU=${UNIT}/CN=${COMMON_NAME}"
+	-out /etc/nginx/certs/certificate.crt \
+	-keyout /etc/nginx/certs/certificate.key \
+	-subj "/C=FR/ST=IDF/L=paris/O=42/OU=42/CN=hvercell.42.fr"
 
+# make a copy of our 2 .conf file in the nginx appropriate directory
 COPY conf/nginx.conf	/etc/nginx/
 COPY conf/server.conf	/etc/nginx/conf.d/
 
-RUN echo "\tserver name ${COMMON_NAME};\n\
-	\tssl_certificate ${CERTIFICATE};\n\
-	\tssl_certificate_key ${KEY};\n\
-	}" >> /etc/nginx/conf.d/server.conf
-
+# make the directory for all the data of the web site and change the owner
 RUN mkdir -p /var/www/
 RUN chown -R www-data:www-data /var/www/
 
-CMD	["nginx", "-g", "daemon off;"]
+# run nginx without the daemon
+CMD ["nginx", "-g", "daemon off;"]

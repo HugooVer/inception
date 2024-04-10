@@ -1,16 +1,20 @@
+# using the penultimate stable version of Debian
 FROM debian:bullseye
 
-EXPOSE 3306
+# EXPOSE 3306
 
+# update the package list and install our package
 RUN apt update && \
 	apt install -y --no-install-recommends --no-install-suggests \
 	mariadb-server && \
 	rm -rf /var/lib/apt/lists/*
 
+# make a copy of our .cnf file to the mariadb configuration directory
 COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/
 
+# make a copy of our setup script to the mariadb /bin directory + add exec right
 COPY tool/setup.sh /bin/
 RUN chmod +x /bin/setup.sh
 
+# exec the script to run mariadb in safe mode
 CMD ["setup.sh", "mysqld_safe"]
-
