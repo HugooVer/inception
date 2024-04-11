@@ -23,7 +23,6 @@ create_dir:
 backup:
 	@if [ -d ~/data ]; then sudo tar -czvf ~/data.tar.gz -C ~/ data/ > $(HIDE) && echo " $(BKP)" ; fi
 
-# Stop les containers puis supprime les fichiers
 clean:
 	@docker compose -f $(COMPOSE) down -v
 	@if [ -n "$$(docker ps -a --filter "name=nginx" -q)" ]; then docker rm -f nginx > $(HIDE) && echo " $(NX_CLN)" ; fi
@@ -39,13 +38,13 @@ fclean: clean backup
 
 status:
 	@clear
-	@echo "\nCONTAINERS\n"
+	@echo "$(GREEN)\nCONTAINERS\n$(RESET)"
 	@docker ps -a
-	@echo "\nIMAGES\n"
+	@echo "$(GREEN)\nIMAGES\n$(RESET)"
 	@docker image ls
-	@echo "\nVOLUMES\n"
+	@echo "$(GREEN)\nVOLUMES\n$(RESET)"
 	@docker volume ls
-	@echo "\nNETWORKS\n"
+	@echo "$(GREEN)\nNETWORKS\n$(RESET)"
 	@docker network ls --filter "name=$(NAME)_all"
 	@echo ""
 
